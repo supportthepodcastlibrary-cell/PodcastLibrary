@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --font-serif: 'Fraunces', serif;
+}
+
+:root {
+  --color-ink-50: #FAFAF8;
+  --color-ink-100: #F6F2EC;
+  --color-ink-200: #E8E2D8;
+  --color-ink-300: #D4CDBF;
+  --color-ink-400: #A8A29A;
+  --color-ink-500: #666666;
+  --color-ink-600: #444444;
+  --color-ink-700: #333333;
+  --color-ink-800: #222222;
+  --color-ink-900: #111111;
+  --color-ink-950: #0A0A0A;
+
+  --color-gold-700: #8A7230;
+  --color-gold-600: #A88836;
+  --color-gold-500: #C8A24D;
+  --color-gold-400: #D8BC6E;
+  --color-gold-300: #E8D49A;
+  --color-gold-200: #F0E2BC;
+  --color-gold-100: #F8F0DC;
+}
+
+@layer base {
+  * {
+    @apply border-ink-200;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-ink-50 text-ink-900 font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+    letter-spacing: -0.01em;
+  }
+  h1, h2, h3, h4 {
+    @apply font-serif;
+    letter-spacing: -0.025em;
+    font-weight: 400;
+  }
+  ::selection {
+    background-color: var(--color-gold-200);
+    color: var(--color-ink-900);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-ink-900 px-7 py-3.5 text-sm font-medium tracking-wide text-ink-50 transition-all duration-300 hover:bg-ink-800 hover:shadow-xl active:scale-[0.97];
+  }
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-gold-500 px-7 py-3.5 text-sm font-medium tracking-wide text-ink-900 transition-all duration-300 hover:bg-gold-400 hover:shadow-xl active:scale-[0.97];
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-ink-300 bg-transparent px-7 py-3.5 text-sm font-medium tracking-wide text-ink-900 transition-all duration-300 hover:border-ink-900 hover:bg-ink-900 hover:text-ink-50 active:scale-[0.97];
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-900;
+  }
+  .card {
+    @apply rounded-2xl border border-ink-200/60 bg-white transition-all duration-300;
+  }
+  .card-hover {
+    @apply rounded-2xl border border-ink-200/60 bg-white transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] hover:-translate-y-1;
+  }
+  .input {
+    @apply w-full rounded-xl border border-ink-200 bg-white px-4 py-3 text-sm text-ink-900 placeholder:text-ink-400 focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/15 transition-colors;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium tracking-wide;
+  }
+  .section-label {
+    @apply text-xs font-medium uppercase tracking-[0.2em] text-gold-600;
+  }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-right {
+  animation: slide-in-right 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes float-subtle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(0.5deg); }
+}
+.animate-float {
+  animation: float-subtle 6s ease-in-out infinite;
+}
+
+@keyframes float-subtle-2 {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(-0.5deg); }
+}
+.animate-float-2 {
+  animation: float-subtle-2 7s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
