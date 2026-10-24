@@ -4,7 +4,7 @@ import type { Order, Notification } from '@/lib/supabase';
 import { useRouter, Link } from '@/lib/router';
 import {
   LayoutDashboard, BookOpen, CreditCard, Star, Wallet,
-  Users, Bell, LogOut, Menu, X, Lock, UserPlus, LifeBuoy,
+  Users, Bell, LogOut, Menu, X, Lock, LifeBuoy,
 } from 'lucide-react';
 
 import AdminEbooks from '@/components/admin/AdminEbooks';
@@ -18,22 +18,28 @@ import AdminTickets from '@/components/admin/AdminTickets';
 export default function AdminPage() {
   const { path, navigate } = useRouter();
   const [authed, setAuthed] = useState(false);
+  const [authorized, setAuthorized] = useState(false);
   const [checking, setChecking] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mode, setMode] = useState<'login' | 'signup'>('login');
-  const [signupError, setSignupError] = useState('');
-  const [signupSuccess, setSignupSuccess] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setAuthed(!!data.session);
-      setChecking(false);
-    });
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      const isAdmin = session?.user?.app_metadata?.role === 'admin';
       setAuthed(!!session);
+      setAuthorized(isAdmin);
+      setChecking(false);
+    };
+
+    checkSession();
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      const isAdmin = session?.user?.app_metadata?.role === 'admin';
+      setAuthed(!!session);
+      setAuthorized(isAdmin);
       setChecking(false);
     });
     return () => listener.subscription.unsubscribe();
@@ -45,22 +51,6 @@ export default function AdminPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setLoginError(error.message);
-    }
-  };
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSignupError('');
-    setSignupSuccess(false);
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      setSignupError(error.message);
-      return;
-    }
-    if (data.user) {
-      setSignupSuccess(true);
-      setEmail('');
-      setPassword('');
     }
   };
 
@@ -77,7 +67,7 @@ export default function AdminPage() {
     );
   }
 
-  if (!authed) {
+  if (!authed || !authorized) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-ink-950 px-4">
         <div className="w-full max-w-md">
@@ -86,62 +76,26 @@ export default function AdminPage() {
               <Lock className="h-7 w-7 text-ink-950" />
             </div>
             <h1 className="font-serif text-2xl font-semibold text-white">Admin Dashboard</h1>
-            <p className="text-sm text-ink-400 mt-2">
-              {mode === 'login' ? 'Sign in to manage The Podcast Library' : 'Create an admin account to get started'}
-            </p>
+            <p className="text-sm text-ink-400 mt-2">Sign in with an authorized administrator account.</p>
           </div>
 
-          {signupSuccess && (
-            <div className="rounded-xl bg-green-500/10 border border-green-500/30 p-4 mb-4 text-sm text-green-400">
-              Account created! Check your email for a confirmation link, then sign in below.
+          {loginError && (
+            <div className="rounded-xl bg-red-500/10 border border-red-500/30 p-4 mb-4 text-sm text-red-300">
+              {loginError}
             </div>
           )}
 
-          {mode === 'login' ? (
-            <form onSubmit={handleLogin} className="rounded-2xl bg-white p-6 space-y-4">
-              {loginError && (
-                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{loginError}</div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-ink-700 mb-1.5">Email</label>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="admin@thepodcastlibrary.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-ink-700 mb-1.5">Password</label>
-                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="input" placeholder="••••••••" />
-              </div>
-              <button type="submit" className="btn-primary w-full">Sign In</button>
-              <p className="text-center text-xs text-ink-500">
-                No admin account yet?{' '}
-                <button type="button" onClick={() => { setMode('signup'); setLoginError(''); }} className="font-semibold text-gold-600 hover:underline">
-                  Create one
-                </button>
-              </p>
-            </form>
-          ) : (
-            <form onSubmit={handleSignup} className="rounded-2xl bg-white p-6 space-y-4">
-              {signupError && (
-                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{signupError}</div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-ink-700 mb-1.5">Email</label>
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="admin@thepodcastlibrary.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-ink-700 mb-1.5">Password</label>
-                <input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="input" placeholder="At least 6 characters" />
-              </div>
-              <button type="submit" className="btn-primary w-full">
-                <UserPlus className="h-4 w-4" /> Create Admin Account
-              </button>
-              <p className="text-center text-xs text-ink-500">
-                Already have an account?{' '}
-                <button type="button" onClick={() => { setMode('login'); setSignupError(''); }} className="font-semibold text-gold-600 hover:underline">
-                  Sign in
-                </button>
-              </p>
-            </form>
-          )}
+          <form onSubmit={handleLogin} className="rounded-2xl bg-white p-6 space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-ink-700 mb-1.5">Email</label>
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input" placeholder="Your admin email" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-ink-700 mb-1.5">Password</label>
+              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="input" placeholder="••••••••" />
+            </div>
+            <button type="submit" className="btn-primary w-full">Sign In</button>
+          </form>
 
           <p className="text-center text-xs text-ink-500 mt-4">
             <Link to="/" className="text-ink-400 hover:text-gold-400 transition-colors">Back to website</Link>
