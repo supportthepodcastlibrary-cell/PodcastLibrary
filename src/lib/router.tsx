@@ -10,24 +10,41 @@ const RouterContext = createContext<RouterContextType>({
   navigate: () => {},
 });
 
+function getPath() {
+  // Support clean URLs such as /admin and /admin/ebooks, while accepting
+  // legacy hash URLs (/#/admin) so old bookmarks continue to work.
+  const hashPath = window.location.hash.startsWith('#/')
+    ? window.location.hash.slice(1)
+    : '';
+  const pathname = window.location.pathname || '/';
+  return hashPath || pathname;
+}
+
 export function RouterProvider({ children }: { children: ReactNode }) {
-  const [path, setPath] = useState(() => {
-    const hash = window.location.hash.replace('#', '');
-    return hash || '/';
-  });
+  const [path, setPath] = useState(getPath);
 
   useEffect(() => {
-    const onHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      setPath(hash || '/');
+    const updatePath = () => {
+      setPath(getPath());
       window.scrollTo(0, 0);
     };
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    window.addEventListener('popstate', updatePath);
+    window.addEventListener('hashchange', updatePath);
+    return () => {
+      window.removeEventListener('popstate', updatePath);
+      window.removeEventListener('hashchange', updatePath);
+    };
   }, []);
 
   const navigate = (to: string) => {
-    window.location.hash = to;
+    const normalized = to.startsWith('/') ? to : `/${to}`;
+    if (window.location.hash.startsWith('#/')) {
+      window.history.replaceState(null, '', normalized);
+    } else {
+      window.history.pushState(null, '', normalized);
+    }
+    setPath(normalized);
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -53,13 +70,15 @@ export function Link({
   onClick?: () => void;
 }) {
   const { navigate } = useRouter();
+  const href = to.startsWith('/') ? to : `/${to}`;
   return (
     <a
-      href={`#${to}`}
+      href={href}
       className={className}
       onClick={(e) => {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         e.preventDefault();
-        navigate(to);
+        navigate(href);
         onClick?.();
       }}
     >
