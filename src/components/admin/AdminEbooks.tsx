@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase, type Ebook, type EbookStatus, type Podcast } from '@/lib/supabase';
-import { Plus, Edit2, Trash2, X, Save, Search, Eye, EyeOff, Rocket, Calendar, FileEdit, BookOpen } from 'lucide-react';
+import { Plus, Edit2, Copy, Trash2, X, Save, Search, Eye, EyeOff, Rocket, Calendar, FileEdit, BookOpen } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 
 const statusConfig: Record<EbookStatus, { label: string; badge: string; icon: typeof Eye }> = {
@@ -54,6 +54,27 @@ export default function AdminEbooks() {
     setShowForm(true);
   };
 
+  const duplicateBook = (book: Ebook) => {
+    const copySuffix = Date.now().toString(36);
+    setEditing(null);
+    setForm({
+      title: `${book.title} (Copy)`,
+      slug: `${book.slug || book.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}-copy-${copySuffix}`,
+      author: book.author,
+      short_description: book.short_description || '',
+      long_description: book.long_description || '',
+      what_you_learn: book.what_you_learn?.length ? [...book.what_you_learn] : [''],
+      price_usd: book.price_usd,
+      cover_url: book.cover_url || '',
+      podcast_id: book.podcast_id || '',
+      featured: book.featured,
+      // Keep copies hidden until the admin reviews and publishes them.
+      status: 'draft',
+      download_url: book.download_url || '',
+    });
+    setShowForm(true);
+  };
+
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -65,15 +86,23 @@ export default function AdminEbooks() {
       cover_url: form.cover_url || null,
     };
 
-    if (editing) {
-      await supabase.from('ebooks').update(payload).eq('id', editing.id);
-    } else {
-      await supabase.from('ebooks').insert(payload);
-    }
+    try {
+      const result = editing
+        ? await supabase.from('ebooks').update(payload).eq('id', editing.id)
+        : await supabase.from('ebooks').insert(payload);
 
-    setSaving(false);
-    setShowForm(false);
-    await loadBooks();
+      if (result.error) {
+        alert(`Could not save eBook: ${result.error.message}`);
+        return;
+      }
+
+      setShowForm(false);
+      await loadBooks();
+    } catch (error) {
+      alert(`Could not save eBook: ${error instanceof Error ? error.message : 'An unexpected error occurred.'}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const deleteBook = async (id: string) => {
@@ -194,8 +223,11 @@ export default function AdminEbooks() {
                       >
                         {(book.status || 'draft') === 'draft' ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
-                      <button onClick={() => openEdit(book)} className="rounded-lg p-2 text-ink-500 hover:bg-ink-100 hover:text-ink-900 transition-colors">
+                      <button onClick={() => openEdit(book)} title="Edit eBook" aria-label={`Edit ${book.title}`} className="rounded-lg p-2 text-ink-500 hover:bg-ink-100 hover:text-ink-900 transition-colors">
                         <Edit2 className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => duplicateBook(book)} title="Duplicate eBook" aria-label={`Duplicate ${book.title}`} className="rounded-lg p-2 text-ink-500 hover:bg-ink-100 hover:text-ink-900 transition-colors">
+                        <Copy className="h-4 w-4" />
                       </button>
                       <button onClick={() => deleteBook(book.id)} className="rounded-lg p-2 text-red-500 hover:bg-red-50 transition-colors">
                         <Trash2 className="h-4 w-4" />
@@ -306,7 +338,7 @@ export default function AdminEbooks() {
                   <p className="mt-2 text-xs text-ink-500">This eBook will be visible on the store with a "Coming Soon" badge. Customers can view details but cannot purchase it.</p>
                 )}
                 {form.status === 'published' && (
-                  <p className="mt-2 text-xs text-ink-500">This eBook is fully live — visible on the store and available for purchase with Bitcoin.</p>
+                  <p className="mt-2 text-xs text-ink-500">This eBook is fully live â€” visible on the store and available for purchase with Bitcoin.</p>
                 )}
               </div>
               <div>
