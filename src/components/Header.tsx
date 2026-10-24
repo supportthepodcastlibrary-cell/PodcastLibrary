@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useRouter } from '@/lib/router';
-import { BookOpen, Menu, X, Library } from 'lucide-react';
+import { BookOpen, Menu, X } from 'lucide-react';
 
 export default function Header() {
   const { path, navigate } = useRouter();
@@ -71,13 +71,6 @@ export default function Header() {
                   )}
                 </Link>
               ))}
-              <button
-                onClick={() => navigate('/admin')}
-                className="ml-4 flex items-center gap-1.5 rounded-full border border-ink-200 px-5 py-2 text-sm font-medium text-ink-500 transition-all duration-300 hover:border-ink-900 hover:text-ink-900"
-              >
-                <Library className="h-3.5 w-3.5" />
-                Admin
-              </button>
             </nav>
 
             <button
@@ -105,12 +98,6 @@ export default function Header() {
                   {item.label}
                 </Link>
               ))}
-              <Link
-                to="/admin"
-                className="block rounded-xl px-4 py-3 text-sm font-medium text-ink-500 hover:bg-ink-100 hover:text-ink-900"
-              >
-                Admin Dashboard
-              </Link>
             </div>
           </nav>
         )}
