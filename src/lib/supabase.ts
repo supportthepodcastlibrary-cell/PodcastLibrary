@@ -103,7 +103,7 @@ export type Notification = {
   sent_at: string | null;
 };
 
-export type TicketStatus = 'open' | 'replied' | 'resolved';
+export type TicketStatus = 'open' | 'replied' | 'resolved' | 'closed';
 
 export type SupportTicket = {
   id: string;
@@ -115,4 +115,12 @@ export type SupportTicket = {
   admin_reply: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type ChatMessage = {
+  id: string;
+  ticket_id: string;
+  sender: 'customer' | 'admin';
+  message: string;
+  created_at: string;
 };
