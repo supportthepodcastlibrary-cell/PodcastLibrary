@@ -25,3 +25,4 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: supabase functions deploy support-email --project-ref yvtnonaslnopdgeuqzfc
         
+ 
