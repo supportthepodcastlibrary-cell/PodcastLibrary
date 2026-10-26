@@ -232,8 +232,8 @@ export default function SupportButton() {
                   <div>
                     <h3 className="font-serif text-base font-semibold text-white">Customer Support</h3>
                     <p className="text-xs text-ink-400">
-                      {conversation ? `Signed in as ${conversation.customerName}` : We'll get back to you in a few minutes.}
-                    </p>
+  {ticket.customerName ? `Hi, ${ticket.customerName}` : "We'll get back to you in a few minutes."}
+</p>
                   </div>
                 </div>
                 {conversation && (
