@@ -23,7 +23,6 @@ export default function AdminOrders() {
       approved_at: status === 'approved' ? new Date().toISOString() : null,
     }).eq('id', id);
 
-    // Find the order from current state (works for both row button and modal)
     const order = orders.find(o => o.id === id) || selected;
     if (order) {
       if (status === 'approved') {
@@ -32,7 +31,7 @@ export default function AdminOrders() {
           recipient_email: order.customer_email,
           recipient_name: order.customer_name,
           subject: 'Payment Verified — Your eBook Download Is Ready',
-          body: `Hi ${order.customer_name}, your Bitcoin payment for "${order.ebook?.title}" has been verified. You can now download your eBook. Thank you for your purchase!`,
+          body: `Hi \( {order.customer_name}, your Bitcoin payment for " \){order.ebook?.title}" has been verified. You can now download your eBook. Thank you for your purchase!`,
           order_id: order.id,
           status: 'pending',
         });
@@ -42,7 +41,7 @@ export default function AdminOrders() {
           recipient_email: order.customer_email,
           recipient_name: order.customer_name,
           subject: 'Payment Verification Issue',
-          body: `Hi ${order.customer_name}, we were unable to verify your Bitcoin payment for "${order.ebook?.title}". Please contact us at support.thepodcastlibrary@gmail.com for assistance.`,
+          body: `Hi \( {order.customer_name}, we were unable to verify your Bitcoin payment for " \){order.ebook?.title}". Please contact us at support.thepodcastlibrary@gmail.com for assistance.`,
           order_id: order.id,
           status: 'pending',
         });
@@ -178,8 +177,16 @@ export default function AdminOrders() {
                   <p className="font-medium text-ink-900">${selected.amount_usd.toFixed(2)}</p>
                 </div>
                 <div className="col-span-2">
-                  <p className="text-ink-500 text-xs uppercase tracking-wide">Bitcoin Transaction ID</p>
-                  <p className="font-mono text-xs text-ink-800 break-all bg-ink-50 rounded-lg p-2 mt-1">{selected.bitcoin_tx_id || 'N/A'}</p>
+                  <p className="text-ink-500 text-xs uppercase tracking-wide">Payment / Card Details</p>
+                  <p className="font-mono text-xs text-ink-800 break-all bg-ink-50 rounded-lg p-2 mt-1">
+                    {selected.bitcoin_tx_id || 'N/A'}
+                  </p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-ink-500 text-xs uppercase tracking-wide">Billing Address</p>
+                  <p className="text-sm text-ink-800 bg-ink-50 rounded-lg p-2 mt-1 break-words">
+                    {selected.billing_address || 'Not provided'}
+                  </p>
                 </div>
                 <div>
                   <p className="text-ink-500 text-xs uppercase tracking-wide">Status</p>
@@ -206,4 +213,4 @@ export default function AdminOrders() {
       )}
     </div>
   );
-}
+                }
