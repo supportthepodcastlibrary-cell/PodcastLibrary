@@ -77,6 +77,7 @@ export type Order = {
   status: OrderStatus;
   created_at: string;
   approved_at: string | null;
+  billing_address?: string | null;
   ebook?: Ebook | null;
 };
 
